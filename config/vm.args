@@ -1,0 +1,6 @@
+-sname roll2d6_server
+
+-setcookie roll2d6_server_cookie
+
++K true
++A30

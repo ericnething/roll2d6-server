@@ -1,0 +1,23 @@
+{application, roll2d6_server,
+ [{description, "An OTP application"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {roll2d6_server_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    cowboy,
+    gun,
+    jsx,
+    esnowflake,
+    %% pgpool,
+    esqlite,
+    eredis
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {maintainers, []},
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.
