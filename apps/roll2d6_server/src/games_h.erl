@@ -12,6 +12,10 @@
 -export([create_game/2]).
 
 
+-define(COUCH_DOMAIN, "localhost").
+-define(COUCH_PORT, 5984).
+
+
 init(Req, _State) ->
     {cowboy_rest, Req, _State}.
 
@@ -44,6 +48,32 @@ create_game(Req0, Jid) ->
     % generate game id
     GameId = esnowflake:generate_id(),
 
+    ok = create_game_couchdb(erlang:integer_to_list(GameId), NewGame),
+
     ok = db:create_new_game(Jid, GameId, Title, GameType),
     {true, Req1, Jid}.
 
+
+create_game_couchdb(GameId, NewGame) ->
+    {ok, ConnPid} = gun:open(?COUCH_DOMAIN, ?COUCH_PORT),
+    {ok, http} = gun:await_up(ConnPid),
+    StreamRef = gun:put(ConnPid, ["/game_", GameId], []),
+    case gun:await(ConnPid, StreamRef) of
+        {response, fin, 201, Headers_} ->
+            populate_database(GameId, NewGame);
+        {response, nofin, 201, Headers_} ->
+            populate_database(GameId, NewGame)
+    end.
+
+populate_database(GameId, NewGame) ->
+    {ok, ConnPid} = gun:open(?COUCH_DOMAIN, ?COUCH_PORT),
+    {ok, http} = gun:await_up(ConnPid),
+    StreamRef = gun:post(ConnPid, 
+        ["/game_", GameId],
+        [{<<"Content-Type">>, <<"application/json">>}],
+        jsx:encode(NewGame)
+    ),
+    case gun:await(ConnPid, StreamRef) of
+        {response, fin, 201, Headers_} -> ok;
+        {response, nofin, 201, Headers_} -> ok
+    end.

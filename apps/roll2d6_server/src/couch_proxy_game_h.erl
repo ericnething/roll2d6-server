@@ -8,4 +8,5 @@ init(Req, Opts) ->
     % check credentials here
 
     <<"/couchdb", Path/binary>> = cowboy_req:path(Req),
-    couch_proxy:forward(Path, Req, Opts).
+    QS = cowboy_req:qs(Req),
+    couch_proxy:forward([Path, "?", QS], Req, Opts).

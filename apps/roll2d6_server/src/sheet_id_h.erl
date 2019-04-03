@@ -26,4 +26,4 @@ is_authorized(Req0, State) ->
 
 get_sheet_id(Req0, State) ->
     SheetId = esnowflake:generate_id(),
-    {jsx:encode(#{ <<"sheetId">> => SheetId}), Req0, State}.
+    {jsx:encode(erlang:integer_to_binary(SheetId)), Req0, State}.
